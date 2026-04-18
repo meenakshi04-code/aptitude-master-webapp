@@ -1,0 +1,224 @@
+```html id="x8k3pl"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Aptitude App with Options</title>
+
+<style>
+body {
+    margin:0;
+    font-family:'Segoe UI';
+    background:linear-gradient(135deg,#141e30,#243b55);
+    color:white;
+    text-align:center;
+}
+
+/* Container */
+.container {
+    max-width:700px;
+    margin:50px auto;
+    background:rgba(0,0,0,0.8);
+    padding:25px;
+    border-radius:15px;
+    animation:fade 1s;
+}
+
+@keyframes fade {
+    from{opacity:0; transform:translateY(40px);}
+}
+
+/* Buttons */
+button {
+    padding:12px 20px;
+    margin:10px;
+    border:none;
+    border-radius:8px;
+    background:#ff9800;
+    color:white;
+    cursor:pointer;
+    transition:0.3s;
+}
+button:hover {
+    transform:scale(1.1);
+    box-shadow:0 0 15px #ff9800;
+}
+
+/* Options */
+.option {
+    margin:10px;
+    padding:12px;
+    background:#444;
+    border-radius:8px;
+    cursor:pointer;
+}
+.option:hover {
+    background:#00c6ff;
+}
+
+/* Hidden */
+.hidden { display:none; }
+
+</style>
+</head>
+
+<body>
+
+<div class="container" id="menu">
+
+<h1>🧠 Aptitude Master</h1>
+
+<h3>Select Category</h3>
+<button onclick="startQuiz('quant')">📊 Quantitative</button>
+<button onclick="startQuiz('english')">🗣️ English</button>
+<button onclick="startQuiz('logic')">🧠 Problem Solving</button>
+<button onclick="startQuiz('mixed')">🔥 Mixed</button>
+
+<h3>Select Timer</h3>
+<button onclick="setTimer(30)">30 sec</button>
+<button onclick="setTimer(45)">45 sec</button>
+<button onclick="setTimer(60)">60 sec</button>
+
+</div>
+
+<div class="container hidden" id="quizArea">
+
+<h2 id="timer"></h2>
+<h3 id="question"></h3>
+<div id="options"></div>
+
+<button onclick="showHint()">💡 Hint</button>
+<div id="hint"></div>
+
+</div>
+
+<script>
+
+let selectedTime = 40;
+let quiz = [];
+let current=0, score=0, time, timer;
+
+/* Question Banks */
+const questions = {
+
+quant: [
+{q:"20% of 200?", options:["40","50","60","20"], answer:"40", hint:"(20×200)/100"}
+],
+
+english: [
+{q:"Choose correct sentence",
+options:[
+"She don't go",
+"She doesn't go",
+"She not go",
+"She goes not"],
+answer:"She doesn't go",
+hint:"Use does + base verb"
+}
+],
+
+logic: [
+{q:"Find next: 2,4,8,16,?",
+options:["18","32","20","24"],
+answer:"32",
+hint:"×2 pattern"
+}
+]
+
+};
+
+/* Timer select */
+function setTimer(t){
+    selectedTime = t;
+}
+
+/* Start Quiz */
+function startQuiz(type){
+
+    document.getElementById("menu").classList.add("hidden");
+    document.getElementById("quizArea").classList.remove("hidden");
+
+    if(type==="mixed"){
+        quiz = [...questions.quant, ...questions.english, ...questions.logic];
+    } else {
+        quiz = questions[type];
+    }
+
+    // add auto questions
+    for(let i=0;i<50;i++){
+        let a=Math.floor(Math.random()*20);
+        let b=Math.floor(Math.random()*20);
+        quiz.push({
+            q:`${a}+${b}?`,
+            options:[a+b,a+b+1,a+b-1,a+b+2],
+            answer:(a+b).toString(),
+            hint:"Addition"
+        });
+    }
+
+    loadQuestion();
+}
+
+/* Load Question */
+function loadQuestion(){
+
+    clearInterval(timer);
+    time = selectedTime;
+
+    timer = setInterval(()=>{
+        time--;
+        document.getElementById("timer").innerText="Time: "+time;
+
+        if(time===0) nextQuestion();
+    },1000);
+
+    let q = quiz[current];
+    document.getElementById("question").innerText=q.q;
+
+    let optDiv=document.getElementById("options");
+    optDiv.innerHTML="";
+    document.getElementById("hint").innerText="";
+
+    q.options.forEach(opt=>{
+        let div=document.createElement("div");
+        div.innerText=opt;
+        div.classList.add("option");
+
+        div.onclick=()=>{
+            if(opt.toString()===q.answer){
+                score++;
+                div.style.background="green";
+            } else {
+                div.style.background="red";
+            }
+            setTimeout(nextQuestion,500);
+        };
+
+        optDiv.appendChild(div);
+    });
+}
+
+/* Hint */
+function showHint(){
+    document.getElementById("hint").innerText =
+        quiz[current].hint;
+}
+
+/* Next */
+function nextQuestion(){
+    current++;
+    if(current<quiz.length){
+        loadQuestion();
+    } else {
+        document.getElementById("quizArea").innerHTML =
+        `<h1>🎉 Finished</h1>
+         <h2>Score: ${score}/${quiz.length}</h2>
+         <button onclick="location.reload()">Restart</button>`;
+    }
+}
+
+</script>
+
+</body>
+</html>
+```
